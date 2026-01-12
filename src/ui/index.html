@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic QA Platform - Test Interface</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .results.show {
+      display: block;
+    }
+
+    .success {
+      color: #27ae60;
+      font-weight: 600;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-weight: 600;
+    }
+
+    .result-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+      border-left: 4px solid #667eea;
+    }
+
+    .loading {
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .example-tests {
+      margin-top: 20px;
+    }
+
+    .example-btn {
+      background: #f0f0f0;
+      color: #333;
+      border: 2px solid #e0e0e0;
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    .example-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🤖 Agentic QA Automation Platform</h1>
+      <p class="subtitle">Write tests in natural language - Let AI do the automation</p>
+    </header>
+
+    <div class="main-content">
+      <div class="card full-width">
+        <h2>Test Specification</h2>
+        <textarea id="testInput" placeholder="Describe your test scenario in plain English...
+
+Example:
+Test Scenario: User Login
+1. Navigate to the login page
+2. Enter username 'test_user'
+3. Enter password 'Test123!'
+4. Click the login button
+5. Verify the user dashboard is displayed
+6. Verify welcome message contains the username"></textarea>
+
+        <div class="example-tests">
+          <strong>Quick Examples:</strong><br>
+          <button class="example-btn" onclick="loadExample('login')">Login Test</button>
+          <button class="example-btn" onclick="loadExample('purchase')">Purchase Flow</button>
+          <button class="example-btn" onclick="loadExample('search')">Search & Filter</button>
+        </div>
+
+        <button id="executeBtn" onclick="executeTest()">🚀 Execute Test</button>
+
+        <div id="results" class="results">
+          <h3>Test Results</h3>
+          <div id="resultsContent"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📊 Statistics</h2>
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-value" id="totalTests">0</div>
+            <div class="stat-label">Tests Executed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="successRate">0%</div>
+            <div class="stat-label">Success Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="healingCount">0</div>
+            <div class="stat-label">Self-Healed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>💡 How It Works</h2>
+        <ol style="line-height: 1.8; color: #555;">
+          <li>Write your test scenario in plain English</li>
+          <li>AI converts it to executable test steps</li>
+          <li>MCP controls the browser via Playwright</li>
+          <li>Tests self-heal when UI changes occur</li>
+          <li>Results are analyzed and reported</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let stats = { total: 0, success: 0, healed: 0 };
+
+    const examples = {
+      login: `Test Scenario: User Login
+1. Navigate to https://demo.example.com/login
+2. Enter username 'test_user' in the username field
+3. Enter password 'Test123!' in the password field
+4. Click the 'Login' button
+5. Verify that the dashboard page is loaded
+6. Verify that welcome message contains 'Welcome, test_user'`,
+      
+      purchase: `Test Scenario: Complete Purchase with Discount
+1. Navigate to the e-commerce site
+2. Login as 'test_user'
+3. Search for 'Blue T-Shirt'
+4. Add first result to cart
+5. Apply discount code 'SAVE20'
+6. Verify discount is applied (20% off)
+7. Complete checkout with test payment info
+8. Verify order confirmation`,
+      
+      search: `Test Scenario: Advanced Product Search
+1. Navigate to product catalog
+2. Enter 'laptop' in search
+3. Apply price filter $500-$1500
+4. Apply brand filter 'Dell'
+5. Apply rating filter 4+ stars
+6. Verify all results match criteria
+7. Sort by price low to high
+8. Verify first item is cheapest`
+    };
+
+    function loadExample(type) {
+      document.getElementById('testInput').value = examples[type];
+    }
+
+    async function executeTest() {
+      const testDescription = document.getElementById('testInput').value.trim();
+      
+      if (!testDescription) {
+        alert('Please enter a test description');
+        return;
+      }
+
+      const btn = document.getElementById('executeBtn');
+      const resultsDiv = document.getElementById('results');
+      const resultsContent = document.getElementById('resultsContent');
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Executing<span class="loading"></span>';
+      resultsDiv.classList.remove('show');
+
+      try {
+        const response = await fetch('http://localhost:3001/api/tests/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ testDescription })
+        });
+
+        const data = await response.json();
+
+        // Update stats
+        stats.total++;
+        if (data.result.success) stats.success++;
+        if (data.result.healingAttempts > 0) stats.healed++;
+        updateStats();
+
+        // Display results
+        resultsDiv.classList.add('show');
+        resultsContent.innerHTML = `
+          <div class="result-item">
+            <div class="${data.result.success ? 'success' : 'error'}">
+              ${data.result.success ? '✅ Test PASSED' : '❌ Test FAILED'}
+            </div>
+            <div><strong>Test ID:</strong> ${data.testId}</div>
+            <div><strong>Steps Completed:</strong> ${data.result.steps}</div>
+            <div><strong>Healing Attempts:</strong> ${data.result.healingAttempts}</div>
+            ${data.result.errors.length > 0 ? `<div><strong>Errors:</strong> ${data.result.errors.length}</div>` : ''}
+          </div>
+          <pre>${JSON.stringify(data.result, null, 2)}</pre>
+        `;
+      } catch (error) {
+        resultsDiv.classList.add('show');
+        resultsContent.innerHTML = `
+          <div class="error">
+            ❌ Error: ${error.message}<br>
+            Make sure the API server is running on port 3001
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🚀 Execute Test';
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('totalTests').textContent = stats.total;
+      document.getElementById('successRate').textContent = 
+        stats.total > 0 ? Math.round((stats.success / stats.total) * 100) + '%' : '0%';
+      document.getElementById('healingCount').textContent = stats.healed;
+    }
+  </script>
+</body>
+</html>
