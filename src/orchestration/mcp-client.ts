@@ -41,10 +41,10 @@ export class MCPClient {
         throw new Error('Failed to get stdin/stdout from server process');
       }
 
-      // Create transport
+      // Create transport with command and args instead of stdin/stdout
       this.transport = new StdioClientTransport({
-        stdin: this.serverProcess.stdin,
-        stdout: this.serverProcess.stdout,
+        command: 'tsx',
+        args: ['src/mcp-server/index.ts'],
       });
 
       // Create and connect client
@@ -99,9 +99,8 @@ export class MCPClient {
     }
 
     try {
-      const response = await this.client.request(
-        { method: 'tools/list' },
-        { timeout: 5000 }
+      const response = await (this.client.request as any)(
+        { method: 'tools/list' }
       );
       return response.tools || [];
     } catch (error) {
@@ -118,15 +117,14 @@ export class MCPClient {
     try {
       logger.debug(`Calling tool: ${toolCall.name}`, { arguments: toolCall.arguments });
       
-      const response = await this.client.request(
+      const response = await (this.client.request as any)(
         {
           method: 'tools/call',
           params: {
             name: toolCall.name,
             arguments: toolCall.arguments,
           },
-        },
-        { timeout: 30000 }
+        }
       );
 
       // Parse the response

@@ -4,7 +4,6 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   type CallToolRequest,
-  type ListToolsRequest,
 } from '@modelcontextprotocol/sdk/types.js';
 import { BrowserManager } from './browser-manager.js';
 import { PlaywrightTools } from './playwright-tools.js';
@@ -38,7 +37,7 @@ export class MCPServer {
 
   private setupHandlers(): void {
     // List available tools
-    this.server.setRequestHandler(ListToolsRequestSchema, async (request: ListToolsRequest) => {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       logger.debug('Listing available tools');
       return {
         tools: [
@@ -206,10 +205,10 @@ export class MCPServer {
             result = await tools.getPageState();
             break;
           case 'expect_visible':
-            result = await tools.expectVisible(args.selector as string);
+            result = await tools.expectVisible(args?.selector as string);
             break;
           case 'expect_text':
-            result = await tools.expectText(args.selector as string, args.expectedText as string);
+            result = await tools.expectText(args?.selector as string, args?.expectedText as string);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);

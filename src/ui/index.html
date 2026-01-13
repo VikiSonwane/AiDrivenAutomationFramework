@@ -357,8 +357,15 @@ Test Scenario: User Login
             <div><strong>Test ID:</strong> ${data.testId}</div>
             <div><strong>Steps Completed:</strong> ${data.result.steps}</div>
             <div><strong>Healing Attempts:</strong> ${data.result.healingAttempts}</div>
+            ${data.result.generatedTestFile ? `<div><strong>📝 Generated Test:</strong> <code>${data.result.generatedTestFile}</code></div>` : ''}
             ${data.result.errors.length > 0 ? `<div><strong>Errors:</strong> ${data.result.errors.length}</div>` : ''}
           </div>
+          ${data.result.generatedTestFile ? `
+            <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 6px;">
+              <strong>✨ Test file generated!</strong><br>
+              Run it anytime with: <code>npx playwright test ${data.result.generatedTestFile.split('/').pop()}</code>
+            </div>
+          ` : ''}
           <pre>${JSON.stringify(data.result, null, 2)}</pre>
         `;
       } catch (error) {

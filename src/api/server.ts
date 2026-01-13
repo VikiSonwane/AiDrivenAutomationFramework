@@ -1,7 +1,6 @@
 import express, { type Request, type Response } from 'express';
 import { Logger } from '../utils/logger.js';
 import { AgenticOrchestrator } from '../orchestration/agentic-orchestrator.js';
-import { v4 as uuidv4 } from 'uuid';
 
 const logger = new Logger('APIServer');
 
@@ -21,7 +20,7 @@ export class APIServer {
     this.app.use(express.urlencoded({ extended: true }));
 
     // CORS
-    this.app.use((req, res, next) => {
+    this.app.use((_req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -29,7 +28,7 @@ export class APIServer {
     });
 
     // Logging
-    this.app.use((req, res, next) => {
+    this.app.use((req, _res, next) => {
       logger.info(`${req.method} ${req.path}`);
       next();
     });
@@ -37,7 +36,7 @@ export class APIServer {
 
   private setupRoutes(): void {
     // Health check
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/health', (_, res: Response) => {
       res.json({ status: 'healthy', timestamp: new Date().toISOString() });
     });
 
@@ -45,22 +44,14 @@ export class APIServer {
     this.app.post('/api/tests/execute', async (req: Request, res: Response) => {
       try {
         const { testDescription } = req.body;
-
         if (!testDescription) {
-          return res.status(400).json({ error: 'testDescription is required' });
+          res.status(400).json({ error: 'Missing testDescription in request body' });
+          return;
         }
-
-        const testId = uuidv4();
-        logger.info(`Executing test: ${testId}`);
-
-        const orchestrator = new AgenticOrchestrator(testId);
+        const orchestrator = new AgenticOrchestrator(`test-${Date.now()}`);
         const result = await orchestrator.execute(testDescription);
-
-        res.json({
-          testId,
-          result,
-          timestamp: new Date().toISOString(),
-        });
+        // Wrap response so the UI reads `data.result` and `data.testId`
+        res.json({ testId: result.testId, result });
       } catch (error: any) {
         logger.error('Test execution failed', error);
         res.status(500).json({
@@ -83,7 +74,7 @@ export class APIServer {
     });
 
     // List recent tests
-    this.app.get('/api/tests', (req: Request, res: Response) => {
+    this.app.get('/api/tests', (_, res: Response) => {
       // TODO: Implement database query
       res.json({
         tests: [],
@@ -107,7 +98,7 @@ export class APIServer {
     });
 
     // Get token usage statistics
-    this.app.get('/api/stats/tokens', (req: Request, res: Response) => {
+    this.app.get('/api/stats/tokens', (_, res: Response) => {
       // TODO: Implement token usage tracking
       res.json({
         totalTokens: 0,
