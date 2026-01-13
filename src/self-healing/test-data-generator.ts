@@ -1,8 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { llmProvider } from '../orchestration/llm-provider.js';
+import { queryOllama } from '../orchestration/llm-provider.js';
 import { TEST_DATA_GENERATION_PROMPT } from '../orchestration/prompts.js';
 import { Logger } from '../utils/logger.js';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { TestDataSchema } from '../orchestration/schemas.js';
 
 const logger = new Logger('TestDataGenerator');
@@ -114,8 +113,6 @@ export class TestDataGenerator {
     try {
       logger.info(`Generating contextual ${type} data with LLM`);
       
-      const llm = llmProvider.getModel('cheap'); // Use cheap model for data generation
-      
       const prompt = await TEST_DATA_GENERATION_PROMPT.format({
         dataType: type,
         context,
@@ -123,13 +120,11 @@ export class TestDataGenerator {
         requirements: requirements ? JSON.stringify(requirements, null, 2) : 'None specified',
       });
 
-      const response = await llm.invoke([
-        new SystemMessage('You are an expert at generating realistic test data. Output valid JSON only.'),
-        new HumanMessage(prompt),
-      ]);
+      const responseText = await queryOllama(
+        `You are an expert at generating realistic test data. Output valid JSON only.\n${prompt}`
+      );
 
-      const content = response.content as string;
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error('Failed to extract JSON from LLM response');
       }
